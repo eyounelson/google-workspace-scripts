@@ -1,5 +1,3 @@
-// Modified from an original post at https://michaelhuskey.medium.com/bulk-add-emails-to-google-calendar-with-apps-script-ada89bd84826
-
 /**
  * This will create a custom menu in your Google Sheet everytime you open the Sheet
  */
@@ -15,20 +13,31 @@ function addAttendeesToEvent(){
   const calendar = CalendarApp.getDefaultCalendar(); 
   const ui = SpreadsheetApp.getUi();
 
-  // Learn how to get your Event ID here: https://stackoverflow.com/a/51704714
   const eventID = getTextFromPrompt('Enter the eventID of the Calendar Event you want to add attendees to:');
   const event = calendar.getEventById(eventID); 
 
   if(event !== null){
     const guests = getGuests();
+
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    let validGuests = 0;
+
     guests.forEach(guest => {
+      let email = guest.trim();
+
       try {
-        event.addGuest(guest);
+        if (emailRegex.test(email)) {
+          event.addGuest(email);
+          validGuests++;
+        } else {
+          console.warn(`${email} is not a valid Email!`);
+        }
       } catch (err) {
         console.error(err);
       }
     });
-    ui.alert('✅ Success',`${guests.length} ${guests.length == 1 ?'person': 'people'} ${guests.length == 1 ?'was': 'were'} added to the calendar event`,ui.ButtonSet.OK);
+
+    ui.alert('✅ Success',`${validGuests} out of ${guests.length} ${guests.length == 1 ?'person': 'people'} ${guests.length == 1 ?'was': 'were'} added to the calendar event`,ui.ButtonSet.OK);
   } else{
     ui.alert('🚨 Error','Not a valid EventID',ui.ButtonSet.OK);
   }
