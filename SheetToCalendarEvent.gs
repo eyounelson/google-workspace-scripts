@@ -17,6 +17,8 @@ function addAttendeesToEvent(){
   const event = calendar.getEventById(eventID); 
 
   if(event !== null){
+
+    event.setGuestsCanSeeGuests(false);
     const guests = getGuests();
 
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
